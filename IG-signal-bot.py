@@ -41,7 +41,7 @@ CLOSE_ON_COMBINED_PROFIT = config_json["strategy"]["Average_take_profit"]
 POLL_INTERVAL = config_json["strategy"]["poll_interval"]
 USE_MARTINGALE= config_json["strategy"]["use_martingale"]
 CURRENCY= config_json["strategy"]["user_currency"]
-MAX_LEVEL= config_json["strategy"]["max_level"]
+MAX_LEVEL= config_json["strategy"]["max_lots"]
 LOT_MULTIPLIER = config_json["strategy"]["lot_multiplier"]
 
 
