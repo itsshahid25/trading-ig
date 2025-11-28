@@ -1,0 +1,17 @@
+{
+    "strategy": {
+        "epic_search": "gold",
+        "market": "None",
+        "direction": "BUY",
+        "user_currency": "GBP",
+        "lot_size": 1,
+        "stop_loss": 0,
+        "Average_take_profit": 5,
+        "use_martingale": true,
+        "max_level": 3,
+        "number_of_orders": 5,
+        "grid_distance": 10,
+        "lot_multiplier": 1.2,
+        "poll_interval": 20
+    }
+}

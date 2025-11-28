@@ -23,25 +23,47 @@ import json
 logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s %(levelname)s %(message)s")
 
+def load_json_config(filepath="config.json"):
+    with open(filepath, "r") as f:
+        return json.load(f)
 
-EPIC_SEARCH = "Germany 40"  # symbol to search for (human-friendly)
+config_json = load_json_config()
+
+    # ---- STRATEGY SETTINGS ----
+EPIC_SEARCH = config_json["strategy"]["epic_search"]  # symbol to search for (human-friendly)
+#EPIC = config_json["strategy"]["market"]  # if you know the epic string, put it here to skip search
+BASE_DIRECTION = config_json["strategy"]["direction"].upper()
+MAX_TRADES= config_json["strategy"]["number_of_orders"]
+GRID_DISTANCE = config_json["strategy"]["grid_distance"]
+BASE_SIZE = config_json["strategy"]["lot_size"]
+STOP_LOSS_PTS = config_json["strategy"]["stop_loss"]
+CLOSE_ON_COMBINED_PROFIT = config_json["strategy"]["Average_take_profit"]
+POLL_INTERVAL = config_json["strategy"]["poll_interval"]
+USE_MARTINGALE= config_json["strategy"]["use_martingale"]
+CURRENCY= config_json["strategy"]["user_currency"]
+MAX_LEVEL= config_json["strategy"]["max_level"]
+LOT_MULTIPLIER = config_json["strategy"]["lot_multiplier"]
+
+
+
+#EPIC_SEARCH = "Germany 40"  # symbol to search for (human-friendly)
 EPIC = None  # if you know the epic string, put it here to skip search
-CURRENCY = "GBP"  # account currency / trade currency
+#CURRENCY = "GBP"  # account currency / trade currency
 
 # Grid / sizing
-BASE_SIZE = 0.05  # base stake (units the IG API expects)
-USE_MARTINGALE = True  # if True, next lots = BASE_SIZE * (2**level); else always BASE_SIZE
-LOT_MULTIPLIER = 1.1  # multiplier for martingale sizing (if used)
-MAX_LEVEL = 10  # max doubling level (ignored if USE_MARTINGALE False)
-MAX_TRADES = 10 # max concurrent same-direction trades allowed
-GRID_DISTANCE = 200.0  # price distance (in instrument price units, e.g., points) to open next trade
-POLL_INTERVAL = 10  # seconds between main loop polls
+#BASE_SIZE = 0.05  # base stake (units the IG API expects)
+#USE_MARTINGALE = True  # if True, next lots = BASE_SIZE * (2**level); else always BASE_SIZE
+#LOT_MULTIPLIER = 1.1  # multiplier for martingale sizing (if used)
+#MAX_LEVEL = 10  # max doubling level (ignored if USE_MARTINGALE False)
+#MAX_TRADES = 10 # max concurrent same-direction trades allowed
+#GRID_DISTANCE = 200.0  # price distance (in instrument price units, e.g., points) to open next trade
+#POLL_INTERVAL = 10  # seconds between main loop polls
 
 # Direction controls: "BUY", "SELL", "BOTH"
-BASE_DIRECTION = "BOTH"
+#BASE_DIRECTION = "BOTH"
 
 # Close conditions
-CLOSE_ON_COMBINED_PROFIT = 2  # close all same-direction trades when combined unrealised profit (currency) >= this (None to disable)
+#CLOSE_ON_COMBINED_PROFIT = 2  # close all same-direction trades when combined unrealised profit (currency) >= this (None to disable)
 # Optionally you can use point-based target: CLOSE_ON_COMBINED_PROFIT_PTS = 2.0  # points from avg price to close
 CLOSE_ON_COMBINED_PROFIT_PTS = None
 
@@ -61,6 +83,7 @@ state = {
 }
 
 
+
 def create_ig_session():
     ig = IGService(
     config.username,
@@ -71,6 +94,8 @@ def create_ig_session():
     ig.create_session()
     logging.info("Logged in to IG (%s)", config.acc_type)
     return ig
+
+
 
 
 def find_epic(ig, search_text):
@@ -588,6 +613,7 @@ def maybe_close_on_combined_profit(ig, epic, profit_target=CLOSE_ON_COMBINED_PRO
 
 def main_loop():
     ig = create_ig_session()
+    load_json_config()
     global EPIC
     if not EPIC:
         EPIC = find_epic(ig, EPIC_SEARCH)
@@ -642,6 +668,7 @@ def main_loop():
                 # We have an active direction; manage grid and exits
                 maybe_open_additional(ig, epic)
                 maybe_close_on_combined_profit(ig, epic)
+                load_json_config()
 
             # safety: if level exceeds max, stop
             if state.get("level", 0) > MAX_LEVEL:
