@@ -41,7 +41,7 @@ BASE_SIZE = 0.10  # base stake (units the IG API expects)
 USE_MARTINGALE = True  # if True, next lots = BASE_SIZE * (2**level); else always BASE_SIZE
 MAX_LEVEL = 10  # max doubling level (ignored if USE_MARTINGALE False)
 MAX_TRADES = 10 # max concurrent same-direction trades allowed
-GRID_DISTANCE = 5.0  # price distance (in instrument price units, e.g., points) to open next trade
+GRID_DISTANCE = 2.0  # price distance (in instrument price units, e.g., points) to open next trade
 POLL_INTERVAL = 5  # seconds between main loop polls
 
 # Direction controls: "BUY", "SELL", "BOTH"

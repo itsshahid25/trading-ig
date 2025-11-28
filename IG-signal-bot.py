@@ -17,38 +17,31 @@ Features added:
 import time
 import logging
 from trading_ig import IGService
-from trading_ig import config  # if you use config; otherwise ignore
+from trading_ig.config import config # if you use config; otherwise ignore
 import json
 
 logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s %(levelname)s %(message)s")
 
-# -------------------------
-# CONFIG - CHANGE THESE
-# -------------------------
-USERNAME = "itsshahid25"  # CHANGE ME
-PASSWORD = "S621541@74i"  # CHANGE ME
-API_KEY = "fa51b09392954a22298b67d2dfd765cfeac8fe26"  # CHANGE ME
-ACC_TYPE = "DEMO"  # "DEMO" or "LIVE"
 
-EPIC_SEARCH = "Gold"  # symbol to search for (human-friendly)
+EPIC_SEARCH = "Germany 40"  # symbol to search for (human-friendly)
 EPIC = None  # if you know the epic string, put it here to skip search
 CURRENCY = "GBP"  # account currency / trade currency
 
 # Grid / sizing
-BASE_SIZE = 0.10  # base stake (units the IG API expects)
+BASE_SIZE = 0.05  # base stake (units the IG API expects)
 USE_MARTINGALE = True  # if True, next lots = BASE_SIZE * (2**level); else always BASE_SIZE
-LOT_MULTIPLIER = 1.2  # multiplier for martingale sizing (if used)
+LOT_MULTIPLIER = 1.1  # multiplier for martingale sizing (if used)
 MAX_LEVEL = 10  # max doubling level (ignored if USE_MARTINGALE False)
 MAX_TRADES = 10 # max concurrent same-direction trades allowed
-GRID_DISTANCE = 2.0  # price distance (in instrument price units, e.g., points) to open next trade
+GRID_DISTANCE = 200.0  # price distance (in instrument price units, e.g., points) to open next trade
 POLL_INTERVAL = 10  # seconds between main loop polls
 
 # Direction controls: "BUY", "SELL", "BOTH"
 BASE_DIRECTION = "BOTH"
 
 # Close conditions
-CLOSE_ON_COMBINED_PROFIT = 10.0  # close all same-direction trades when combined unrealised profit (currency) >= this (None to disable)
+CLOSE_ON_COMBINED_PROFIT = 2  # close all same-direction trades when combined unrealised profit (currency) >= this (None to disable)
 # Optionally you can use point-based target: CLOSE_ON_COMBINED_PROFIT_PTS = 2.0  # points from avg price to close
 CLOSE_ON_COMBINED_PROFIT_PTS = None
 
@@ -69,9 +62,14 @@ state = {
 
 
 def create_ig_session():
-    ig = IGService(username=USERNAME, password=PASSWORD, api_key=API_KEY)
+    ig = IGService(
+    config.username,
+    config.password,
+    config.api_key,
+    config.acc_type       # "DEMO" or "LIVE"
+   )
     ig.create_session()
-    logging.info("Logged in to IG (%s)", ACC_TYPE)
+    logging.info("Logged in to IG (%s)", config.acc_type)
     return ig
 
 
@@ -117,7 +115,7 @@ def find_epic(ig, search_text):
 
 def compute_size(level):
     if USE_MARTINGALE:
-        return round(BASE_SIZE * (LOT_MULTIPLIER ** level), 8)
+        return round(BASE_SIZE * (LOT_MULTIPLIER ** level), 2)
     else:
         return BASE_SIZE
 
@@ -463,6 +461,7 @@ def maybe_open_additional(ig, epic):
 
     summary = combined_positions_summary(positions)
     avg_price = summary["avg_price"]
+    avg_price = round(avg_price, 2) if avg_price is not None else None
     total_size = summary["total_size"]
     combined_profit = summary["combined_unrealised_profit"]
     logging.info("Positions summary: count=%s total_size=%s avg_price=%s combined_profit=%s",
